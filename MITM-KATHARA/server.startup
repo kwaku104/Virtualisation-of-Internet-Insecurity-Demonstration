@@ -1,0 +1,4 @@
+ifconfig eth0 inet 200.7.0.2/16
+
+route add default gw 200.7.0.1
+
