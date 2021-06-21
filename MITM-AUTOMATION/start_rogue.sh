@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "Killing any existing rogue AS"
 ./stop_rogue.sh
 
 echo "Starting rogue AS"
