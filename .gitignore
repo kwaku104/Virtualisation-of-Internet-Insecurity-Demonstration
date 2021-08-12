@@ -1,1 +1,8 @@
 MITM-AUTOMATION/venv
+venv/
+topologyTest.json
+MITM-KATHARA/new.json
+MITM-KATHARA/saveRouteTable.py
+MITM-AUTOMATION/sysTest.py
+DETECTION-TOOL/
+MITM-KATHARA/conf/
