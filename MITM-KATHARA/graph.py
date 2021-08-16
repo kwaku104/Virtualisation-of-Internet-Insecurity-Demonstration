@@ -162,21 +162,10 @@ def get_routePath(device):
 # get_routePath()
 
 
-def start():
-    # edgeList = []
-
-    # Use the library normally, for example:
-    # canvas.size((300, 200))
-    # canvas.nodes(deviceList).add()
-    for i in range(len(deviceList)):
-        canvas.node(deviceList[i]).add(size=20)
-        canvas.node(deviceList[i]).label(i).add(
-            text=f"{deviceList[i]}", color='red', size=15)
-
-    for edge in edgeList:
-        canvas.edge(edge).add(directed=True)
-    print('refreshed!')
+def click():
+    canvas.node('start').highlight().size('1x').pause(0.5)
     canvas.pause(1)
+    # canvas.edges(edgeListUnique).add(directed=True)
     colours = ['blue', 'red', 'green', 'violet',
                'yellow', 'purple', 'black', 'Orange']
 
@@ -186,8 +175,10 @@ def start():
             continue
         print(device)
         route = get_routePath(device)
+        print(f'This is the route path: {route}')
         # print(route)
         canvas.node(device).highlight().size('1.5x').pause(0.5)
+        canvas.edges(route).add(directed=True)
         canvas.edges(route).traverse(colours[col])
         # map(lambda routeTup: canvas.edge(
         #     routeTup).traverse(colours[col]), route)
@@ -195,6 +186,75 @@ def start():
         print(f" col: {col} & lenght: {len(colours)}")
         if col < len(colours) - 1:
             col += 1
+
+
+def start():
+    # edgeList = []
+
+    # Use the library normally, for example:
+    # canvas.size((300, 200))
+    # canvas.nodes(deviceList).add()
+
+    # for i in range(len(deviceList)):
+    #     canvas.node(deviceList[i]).add(size=20)
+    #     canvas.node(deviceList[i]).label(i).add(
+    #         text=f"{deviceList[i]}", color='red', size=15)
+
+    # for edge in edgeList:
+    #     canvas.edge(edge).add(directed=True)
+
+    # deviceListDict = {deviceList.index(device): {'device': device, 'AS': f'AS-{deviceList.index(device)}'}
+    #                   for device in deviceList if device == 'server'}
+    deviceListDict = {}
+    print(deviceList)
+    for device in deviceList:
+        if device == 'server':
+            autonomousSystem = 'AS-2'
+        elif device == 'dumpserver':
+            autonomousSystem = 'AS-8'
+        else:
+            autonomousSystem = f'AS-{deviceList.index(device) + 1}'
+        deviceListDict[device] = {
+            'device': device, 'AS': f'{autonomousSystem}'}
+
+    keys, values = deviceListDict.keys(), deviceListDict.values()
+
+    canvas.node('start').add(
+        shape='rect',
+        size=(42, 20),
+        pos=((3 - 2) * 35, (13 - 2) * 35),
+        labels={0: {'text': 'Click to start!'}}
+    )
+
+    canvas.nodes(keys).data(values).add(
+        shape='circle',
+        size=35,
+        labels=lambda d: {
+            0: {'text': d['device']},
+            'ASN': {
+                'angle': 90,
+                'color': 'red',
+                'text': d['AS']
+            }
+        }
+    )
+
+    node_coords = [(-10, -2), (3, -2), (16, -2), (3, 4), (-10, 4),
+                   (3, 9), (16, 9), (-10, 9), (-17, 9), (3, -7)]
+
+    canvas.nodes(deviceList).data(node_coords).add(
+        pos=lambda p: ((p[0] - 2) * 35, (p[1] - 2) * 35),
+        fixed=True,
+    )
+
+    global edgeListUnique
+    print(edgeList)
+    edgeListSorted = [tuple(sorted(edge)) for edge in edgeList]
+    edgeListUnique = list(set(edgeListSorted))
+    canvas.edges(edgeListUnique).add()
+
+    print('refreshed!')
+    canvas.node('start').onclick(click)
 
     # canvas.node(1).highlight().size('1.5x').pause(0.5)
     # canvas.edge((1, 2)).traverse('blue')
