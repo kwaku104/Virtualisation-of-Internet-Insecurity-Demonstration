@@ -220,7 +220,7 @@ def startLab():
     )
 
     node_coords = [(-10, -2), (3, -2), (16, -2), (3, 4), (-10, 4),
-                   (3, 9), (16, 9), (-10, 9), (-17, 9), (3, -7)]
+                   (3, 9), (16, 9), (-10, 9), (-4, 9), (-17, 9), (3, -7)]
 
     canvas.nodes(deviceList).data(node_coords).add(
         pos=lambda p: ((p[0] - 2) * 35, (p[1] - 2) * 35),
@@ -266,10 +266,10 @@ def stopAttack():
     stopAttackProcess = [stopAttackProcess.rstrip().decode("utf-8")
                          for stopAttackProcess in stopAttackProcess]
     title_label = canvas.label('title')
-    title_label.add().pos((0, '0.8cy')).text('')
+    title_label.add().pos((0, '0.7cy')).text('')
     for output in stopAttackProcess:
         animate_text(title_label, output)
-        canvas.pause(0.5)
+        # canvas.pause(0.5)
         print(output)
     return stopAttackProcess
 
