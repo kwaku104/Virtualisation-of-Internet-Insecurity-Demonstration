@@ -17,7 +17,7 @@ def getJsonTopology():
                 continue
             if line[:line.index('[')] not in deviceList:
                 deviceDict = {}
-                if line[:line.index('[')] == 'server':
+                if line[:line.index('[')] == 'dumpserver9':
                     endofLine = -1
                 else:
                     endofLine = -2
@@ -53,7 +53,7 @@ def getEdgeList():
     global topolopgy
     global deviceList
     topolopgy = getJsonTopology()
-    # print(topolopgy)
+    print(topolopgy)
     # breakpoint()
     deviceList = []
     for config in topolopgy:
@@ -69,7 +69,7 @@ def getEdgeList():
         # print(interfaceList)
         # breakpoint()
         setInterfaceList = set(interfaceList)
-        for matchingInterface in topolopgy[1:]:
+        for matchingInterface in topolopgy:
             matchingInterfaceList = list(
                 matchingInterface['interfaces'].values())
             # print(matchingInterfaceList)
@@ -78,6 +78,8 @@ def getEdgeList():
             if interfaceList == matchingInterfaceList:
                 continue
             setMatchingInterfaceList = set(matchingInterfaceList)
+            print(
+                f"setInterfaceList: {setInterfaceList} || setMatchingInterfaceList: {setMatchingInterfaceList}")
             if setInterfaceList & setMatchingInterfaceList:
                 edgeList.append(
                     (topolopgy[interface]['device_name'], matchingInterface['device_name']))
@@ -178,17 +180,18 @@ def animate_text(label, text):
 def startLab():
     canvas.node('startLab').highlight().size('1x').pause(0.5)
     startLabProcess = subprocess.Popen(
-        ["kathara", "lstart", "-o", "'image=kathara/custom-kathara-image'"], stdout=subprocess.PIPE)
+        ["kathara", "lrestart", "-o", "'image=kathara/custom-kathara-image'"], stdout=subprocess.PIPE)
     startLabProcess = startLabProcess.stdout.readlines()
     startLabProcess = [startLabProcess.rstrip().decode("utf-8")
                        for startLabProcess in startLabProcess]
     title_label = canvas.label('title')
-    title_label.add().pos((0, '0.7cy')).text('')
+    title_label.add().pos((0, '0.85cy')).text('')
     for output in startLabProcess:
         animate_text(title_label, output)
         canvas.pause(0.5)
         print(output)
-    # animate_text(title_label, 'Attack Successfully Launched')
+    animate_text(
+        title_label, 'Gathering device information to plot topology ...')
 
     global edgeList
     edgeList = getEdgeList()
@@ -200,7 +203,7 @@ def startLab():
         elif device == 'dumpserver':
             autonomousSystem = 'AS-8'
         else:
-            autonomousSystem = f'AS-{deviceList.index(device) + 1}'
+            autonomousSystem = f'AS-{device[-1]}'
         deviceListDict[device] = {
             'device': device, 'AS': f'{autonomousSystem}'}
 
@@ -220,7 +223,7 @@ def startLab():
     )
 
     node_coords = [(-10, -2), (3, -2), (16, -2), (3, 4), (-10, 4),
-                   (3, 9), (16, 9), (-10, 9), (-4, 9), (-17, 9), (3, -7)]
+                   (3, 9), (16, 9), (-10, 9), (-4, 9), (-17, 9), (3, -7), (-10, -7), (16, -7), (8, 4), (-17, 4), (3, 12), (20, 9), (-4, 4)]
 
     canvas.nodes(deviceList).data(node_coords).add(
         pos=lambda p: ((p[0] - 2) * 35, (p[1] - 2) * 35),
@@ -232,13 +235,30 @@ def startLab():
     edgeListSorted = [tuple(sorted(edge)) for edge in edgeList]
     edgeListUnique = list(set(edgeListSorted))
     canvas.edges(edgeListUnique).add()
-
+    animate_text(
+        title_label, 'Topology Plotted Successfully.')
     return startLabProcess
 
 
 def applyFilters():
     canvas.node('applyFilters').highlight().size('1x').pause(0.5)
-    pass
+    dumpserverList = [
+        dumpserver for dumpserver in deviceList if 'server' in dumpserver]
+    for dumpserver in dumpserverList:
+        if dumpserver == 'dumpserver':
+            continue
+        print(dumpserver)
+        routeFilterProcess = subprocess.Popen(
+            ["kathara", "exec", dumpserver, "--", "python3", "routeFilterScript.py"], stdout=subprocess.PIPE)
+        routeFilterProcess = routeFilterProcess.stdout.readlines()
+        routeFilterProcess = [routeFilterProcess.rstrip().decode("utf-8")
+                              for routeFilterProcess in routeFilterProcess]
+        title_label = canvas.label('title')
+        title_label.add().pos((0, '0.85cy')).text('')
+        animate_text(title_label, 'Applying route filters to routers ...')
+        for output in routeFilterProcess:
+            print(output)
+    animate_text(title_label, 'Route Filters Launched Successfully')
 
 
 def launchAttack():
@@ -249,29 +269,30 @@ def launchAttack():
     attackProcess = [attackProcess.rstrip().decode("utf-8")
                      for attackProcess in attackProcess]
     title_label = canvas.label('title')
-    title_label.add().pos((0, '0.7cy')).text('')
+    title_label.add().pos((0, '0.85cy')).text('')
+    animate_text(title_label, 'Launching attack ...')
     for output in attackProcess:
-        animate_text(title_label, 'Launching attack ..')
         print(output)
     animate_text(title_label, 'Attack Successfully Launched')
     # canvas.pause(0.5)
     return attackProcess
 
 
-def stopAttack():
-    canvas.node('stopAttack').highlight().size('1x').pause(0.5)
-    stopAttackProcess = subprocess.Popen(
-        ["kathara", "exec", "dumpserver", "--", "python3", "stopAttack.py"], stdout=subprocess.PIPE)
-    stopAttackProcess = stopAttackProcess.stdout.readlines()
-    stopAttackProcess = [stopAttackProcess.rstrip().decode("utf-8")
-                         for stopAttackProcess in stopAttackProcess]
+def stopLab():
+    canvas.node('stopLab').highlight().size('1x').pause(0.5)
+    stopLabProcess = subprocess.Popen(
+        ["kathara", "lclean"], stdout=subprocess.PIPE)
+    stopLabProcess = stopLabProcess.stdout.readlines()
+    stopLabProcess = [stopLabProcess.rstrip().decode("utf-8")
+                      for stopLabProcess in stopLabProcess]
     title_label = canvas.label('title')
-    title_label.add().pos((0, '0.7cy')).text('')
-    for output in stopAttackProcess:
+    title_label.add().pos((0, '0.85cy')).text('')
+    for output in stopLabProcess:
         animate_text(title_label, output)
         # canvas.pause(0.5)
         print(output)
-    return stopAttackProcess
+    animate_text(title_label, 'Lab stopped successfully')
+    return stopLabProcess
 
 
 def click():
@@ -289,7 +310,7 @@ def click():
 
     col = 0
     for device in deviceList:
-        if device == 'server' or device == 'dumpserver' or device == 'router2':
+        if 'server' in device or device == 'router2':
             continue
         print(device)
         route = get_routePath(device)
@@ -311,7 +332,7 @@ def start():
     canvas.node('start').add(
         shape='rect',
         size=(53, 20),
-        pos=((3 - 2) * 35, (13 - 2) * 35),
+        pos=((3 - 2) * 35, (15 - 2) * 35),
         color='blue',
         fixed=True,
         draggable=False,
@@ -321,7 +342,7 @@ def start():
     canvas.node('startLab').add(
         shape='rect',
         size=(53, 20),
-        pos=((-5 - 2) * 35, (13 - 2) * 35),
+        pos=((-5 - 2) * 35, (15 - 2) * 35),
         color='green',
         fixed=True,
         draggable=False,
@@ -331,26 +352,26 @@ def start():
     canvas.node('launchAttack').add(
         shape='rect',
         size=(53, 20),
-        pos=((7 - 2) * 35, (13 - 2) * 35),
+        pos=((7 - 2) * 35, (15 - 2) * 35),
         color='red',
         fixed=True,
         draggable=False,
         labels={0: {'text': 'Launch Attack'}}
     )
 
-    canvas.node('stopAttack').add(
+    canvas.node('stopLab').add(
         shape='rect',
         size=(53, 20),
-        pos=((11 - 2) * 35, (13 - 2) * 35),
+        pos=((11 - 2) * 35, (15 - 2) * 35),
         fixed=True,
         draggable=False,
-        labels={0: {'text': 'Stop Attack'}}
+        labels={0: {'text': 'Stop Lab'}}
     )
 
     canvas.node('applyFilters').add(
         shape='rect',
         size=(53, 20),
-        pos=((-1 - 2) * 35, (13 - 2) * 35),
+        pos=((-1 - 2) * 35, (15 - 2) * 35),
         color='yellow',
         fixed=True,
         draggable=False,
@@ -362,7 +383,7 @@ def start():
     canvas.node('startLab').onclick(startLab)
     canvas.node('applyFilters').onclick(applyFilters)
     canvas.node('launchAttack').onclick(launchAttack)
-    canvas.node('stopAttack').onclick(stopAttack)
+    canvas.node('stopLab').onclick(stopLab)
 
 
 # Call the function above when the client broadcasts a 'start' message
