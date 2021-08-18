@@ -1,1 +1,14 @@
+
 /etc/init.d/zebra start
+
+echo root:kathara >> newpass
+
+service ssh start
+
+echo UseLogin yes >> /etc/ssh/sshd_config
+echo PermitRootLogin yes >> /etc/ssh/sshd_config
+echo PasswordAuthentication yes >> /etc/ssh/sshd_config
+
+service ssh restart
+
+cat newpass | chpasswd
