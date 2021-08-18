@@ -49,35 +49,39 @@ def getJsonTopology():
     return devicePayLoad
 
 
-topolopgy = getJsonTopology()
-# print(topolopgy)
-# breakpoint()
-deviceList = []
-for config in topolopgy:
-    deviceList.append(config['device_name'])
-    # print(config['interfaces'].values())
-# print(deviceList)
-edgeList = []
-for interface in range(len(topolopgy)):
-    interfaceList = list(topolopgy[interface]
-                         ['interfaces'].values())
-    interfaceList = [domain['collision_domain'] for domain in interfaceList]
-    # print(interfaceList)
+def getEdgeList():
+    global topolopgy
+    global deviceList
+    topolopgy = getJsonTopology()
+    # print(topolopgy)
     # breakpoint()
-    setInterfaceList = set(interfaceList)
-    for matchingInterface in topolopgy[1:]:
-        matchingInterfaceList = list(
-            matchingInterface['interfaces'].values())
-        # print(matchingInterfaceList)
-        matchingInterfaceList = [domain['collision_domain']
-                                 for domain in matchingInterfaceList]
-        if interfaceList == matchingInterfaceList:
-            continue
-        setMatchingInterfaceList = set(matchingInterfaceList)
-        if setInterfaceList & setMatchingInterfaceList:
-            edgeList.append(
-                (topolopgy[interface]['device_name'], matchingInterface['device_name']))
-    # print(edgeList)
+    deviceList = []
+    for config in topolopgy:
+        deviceList.append(config['device_name'])
+        # print(config['interfaces'].values())
+    # print(deviceList)
+    edgeList = []
+    for interface in range(len(topolopgy)):
+        interfaceList = list(topolopgy[interface]
+                             ['interfaces'].values())
+        interfaceList = [domain['collision_domain']
+                         for domain in interfaceList]
+        # print(interfaceList)
+        # breakpoint()
+        setInterfaceList = set(interfaceList)
+        for matchingInterface in topolopgy[1:]:
+            matchingInterfaceList = list(
+                matchingInterface['interfaces'].values())
+            # print(matchingInterfaceList)
+            matchingInterfaceList = [domain['collision_domain']
+                                     for domain in matchingInterfaceList]
+            if interfaceList == matchingInterfaceList:
+                continue
+            setMatchingInterfaceList = set(matchingInterfaceList)
+            if setInterfaceList & setMatchingInterfaceList:
+                edgeList.append(
+                    (topolopgy[interface]['device_name'], matchingInterface['device_name']))
+    return edgeList
 
 
 def get_routePath(device):
@@ -162,49 +166,32 @@ def get_routePath(device):
 # get_routePath()
 
 
-def click():
-    canvas.node('start').highlight().size('1x').pause(0.5)
-    canvas.pause(1)
-    # canvas.edges(edgeListUnique).add(directed=True)
-    colours = ['blue', 'red', 'green', 'violet',
-               'yellow', 'purple', 'black', 'Orange']
-
-    col = 0
-    for device in deviceList:
-        if device == 'server' or device == 'dumpserver' or device == 'router2':
-            continue
-        print(device)
-        route = get_routePath(device)
-        print(f'This is the route path: {route}')
-        # print(route)
-        canvas.node(device).highlight().size('1.5x').pause(0.5)
-        canvas.edges(route).add(directed=True)
-        canvas.edges(route).traverse(colours[col])
-        # map(lambda routeTup: canvas.edge(
-        #     routeTup).traverse(colours[col]), route)
-        canvas.node(device).onclick(print('clicked!'))
-        print(f" col: {col} & lenght: {len(colours)}")
-        if col < len(colours) - 1:
-            col += 1
+def animate_text(label, text):
+    label \
+        .visible(False) \
+        .pause(0.5) \
+        .text(text) \
+        .visible(True) \
+        .pause(0.5)
 
 
-def start():
-    # edgeList = []
+def startLab():
+    canvas.node('startLab').highlight().size('1x').pause(0.5)
+    startLabProcess = subprocess.Popen(
+        ["kathara", "lstart", "-o", "'image=kathara/custom-kathara-image'"], stdout=subprocess.PIPE)
+    startLabProcess = startLabProcess.stdout.readlines()
+    startLabProcess = [startLabProcess.rstrip().decode("utf-8")
+                       for startLabProcess in startLabProcess]
+    title_label = canvas.label('title')
+    title_label.add().pos((0, '0.7cy')).text('')
+    for output in startLabProcess:
+        animate_text(title_label, output)
+        canvas.pause(0.5)
+        print(output)
+    # animate_text(title_label, 'Attack Successfully Launched')
 
-    # Use the library normally, for example:
-    # canvas.size((300, 200))
-    # canvas.nodes(deviceList).add()
-
-    # for i in range(len(deviceList)):
-    #     canvas.node(deviceList[i]).add(size=20)
-    #     canvas.node(deviceList[i]).label(i).add(
-    #         text=f"{deviceList[i]}", color='red', size=15)
-
-    # for edge in edgeList:
-    #     canvas.edge(edge).add(directed=True)
-
-    # deviceListDict = {deviceList.index(device): {'device': device, 'AS': f'AS-{deviceList.index(device)}'}
-    #                   for device in deviceList if device == 'server'}
+    global edgeList
+    edgeList = getEdgeList()
     deviceListDict = {}
     print(deviceList)
     for device in deviceList:
@@ -218,13 +205,6 @@ def start():
             'device': device, 'AS': f'{autonomousSystem}'}
 
     keys, values = deviceListDict.keys(), deviceListDict.values()
-
-    canvas.node('start').add(
-        shape='rect',
-        size=(42, 20),
-        pos=((3 - 2) * 35, (13 - 2) * 35),
-        labels={0: {'text': 'Click to start!'}}
-    )
 
     canvas.nodes(keys).data(values).add(
         shape='circle',
@@ -253,13 +233,136 @@ def start():
     edgeListUnique = list(set(edgeListSorted))
     canvas.edges(edgeListUnique).add()
 
+    return startLabProcess
+
+
+def applyFilters():
+    canvas.node('applyFilters').highlight().size('1x').pause(0.5)
+    pass
+
+
+def launchAttack():
+    canvas.node('launchAttack').highlight().size('1x').pause(0.5)
+    attackProcess = subprocess.Popen(
+        ["kathara", "exec", "dumpserver", "--", "python3", "launchAttack.py"], stdout=subprocess.PIPE)
+    attackProcess = attackProcess.stdout.readlines()
+    attackProcess = [attackProcess.rstrip().decode("utf-8")
+                     for attackProcess in attackProcess]
+    title_label = canvas.label('title')
+    title_label.add().pos((0, '0.7cy')).text('')
+    for output in attackProcess:
+        animate_text(title_label, 'Launching attack ..')
+        print(output)
+    animate_text(title_label, 'Attack Successfully Launched')
+    # canvas.pause(0.5)
+    return attackProcess
+
+
+def stopAttack():
+    canvas.node('stopAttack').highlight().size('1x').pause(0.5)
+    stopAttackProcess = subprocess.Popen(
+        ["kathara", "exec", "dumpserver", "--", "python3", "stopAttack.py"], stdout=subprocess.PIPE)
+    stopAttackProcess = stopAttackProcess.stdout.readlines()
+    stopAttackProcess = [stopAttackProcess.rstrip().decode("utf-8")
+                         for stopAttackProcess in stopAttackProcess]
+    title_label = canvas.label('title')
+    title_label.add().pos((0, '0.8cy')).text('')
+    for output in stopAttackProcess:
+        animate_text(title_label, output)
+        canvas.pause(0.5)
+        print(output)
+    return stopAttackProcess
+
+
+def click():
+    canvas.node('start').highlight().size('1x').pause(0.5)
+    # edgeList = getEdgeList()
+    canvas.pause(1)
+    canvas.edges(edgeList).remove()
+    canvas.edges(edgeListUnique).remove()
+    print(f'Edge List is: {edgeList}')
+    print(f'Edge List Unique is: {edgeListUnique}')
+    canvas.edges(edgeListUnique).add()
+    # canvas.edges(edgeListUnique).add(directed=True)
+    colours = ['blue', 'red', 'green', 'violet',
+               'yellow', 'purple', 'black', 'Orange']
+
+    col = 0
+    for device in deviceList:
+        if device == 'server' or device == 'dumpserver' or device == 'router2':
+            continue
+        print(device)
+        route = get_routePath(device)
+        # canvas.edges(route).remove()
+        print(f'This is the route path: {route}')
+        # print(route)
+        canvas.node(device).highlight().size('1.5x').pause(0.5)
+        canvas.edges(route).add(directed=True)
+        canvas.edges(route).traverse(colours[col])
+        # map(lambda routeTup: canvas.edge(
+        #     routeTup).traverse(colours[col]), route)
+        canvas.node(device).onclick(print('clicked!'))
+        print(f" col: {col} & lenght: {len(colours)}")
+        if col < len(colours) - 1:
+            col += 1
+
+
+def start():
+    canvas.node('start').add(
+        shape='rect',
+        size=(53, 20),
+        pos=((3 - 2) * 35, (13 - 2) * 35),
+        color='blue',
+        fixed=True,
+        draggable=False,
+        labels={0: {'text': 'Display Route Path'}}
+    )
+
+    canvas.node('startLab').add(
+        shape='rect',
+        size=(53, 20),
+        pos=((-5 - 2) * 35, (13 - 2) * 35),
+        color='green',
+        fixed=True,
+        draggable=False,
+        labels={0: {'text': 'Start Lab'}}
+    )
+
+    canvas.node('launchAttack').add(
+        shape='rect',
+        size=(53, 20),
+        pos=((7 - 2) * 35, (13 - 2) * 35),
+        color='red',
+        fixed=True,
+        draggable=False,
+        labels={0: {'text': 'Launch Attack'}}
+    )
+
+    canvas.node('stopAttack').add(
+        shape='rect',
+        size=(53, 20),
+        pos=((11 - 2) * 35, (13 - 2) * 35),
+        fixed=True,
+        draggable=False,
+        labels={0: {'text': 'Stop Attack'}}
+    )
+
+    canvas.node('applyFilters').add(
+        shape='rect',
+        size=(53, 20),
+        pos=((-1 - 2) * 35, (13 - 2) * 35),
+        color='yellow',
+        fixed=True,
+        draggable=False,
+        labels={0: {'text': 'Apply Route Filters'}}
+    )
+
     print('refreshed!')
     canvas.node('start').onclick(click)
-
-    # canvas.node(1).highlight().size('1.5x').pause(0.5)
-    # canvas.edge((1, 2)).traverse('blue')
-    # canvas.edge((2, 4)).traverse('blue')
-    # canvas.edge((4, 6)).traverse('blue')
+    canvas.node('startLab').onclick(startLab)
+    canvas.node('applyFilters').onclick(applyFilters)
+    canvas.node('launchAttack').onclick(launchAttack)
+    canvas.node('stopAttack').onclick(stopAttack)
 
 
 # Call the function above when the client broadcasts a 'start' message
