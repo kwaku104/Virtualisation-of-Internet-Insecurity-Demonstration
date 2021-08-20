@@ -274,6 +274,9 @@ def launchAttack():
     for output in attackProcess:
         print(output)
     animate_text(title_label, 'Attack Successfully Launched')
+    for _ in range(6):
+        animate_text(title_label, 'Route Changes Detected ...')
+        click()
     # canvas.pause(0.5)
     return attackProcess
 
