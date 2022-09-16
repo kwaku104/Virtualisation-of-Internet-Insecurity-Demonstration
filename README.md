@@ -16,7 +16,7 @@ A reply path is constructed by declaring a route path to forward the traffic to 
 2. Python3.8 - https://www.python.org/downloads/
 3. Make sure the latest version of Kathara is installed - https://www.kathara.org/
 
-## To run this project successfully, a custom docker image must be created for kathara. Paramiko is needed to establish the SSH connection and must be installed by creating the custom docker image and running the kathara lab with this image.
+### To run this project successfully, a custom docker image must be created for kathara. Paramiko is needed to establish the SSH connection and must be installed by creating the custom docker image and running the kathara lab with this image.
 
 1. Pull the latest kathara/quagga image:
 
