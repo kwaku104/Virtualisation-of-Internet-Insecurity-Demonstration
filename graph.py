@@ -1,6 +1,7 @@
 import algorithmx
 import subprocess
-
+import os
+import sys
 # Create a new HTTP server
 server = algorithmx.http_server(port=5050)
 # Create a CanvasSelection interface
@@ -11,7 +12,7 @@ def getJsonTopology():
     deviceList = []
     devicePayLoad = []
 
-    with open('/Users/kwakuappiah-adu/Documents/lboro/Final-Project/Virtualisation-of-Internet-Insecurity-Demonstration/MITM-KATHARA/lab.conf', 'r') as f:
+    with open(os.path.join(sys.path[0], 'lab.conf'), 'r') as f:
         for line in f:
             if '[' not in line:
                 continue
@@ -94,78 +95,41 @@ def get_routePath(device):
     while True:
         nextHopDict = {}
         line = process.stdout.readlines()
-        # [20:29] * 200.6.0.0/17     199.9.9.6
-        # for node in topolopgy:
-        # print(line.rstrip().decode("utf-8"))
         line = [line.rstrip().decode("utf-8") for line in line]
         for lineIndex in range(len(line)):
             print(line[lineIndex])
-        # breakpoint()
             if line[lineIndex][:15] == '*> 200.7.0.0   ':
                 nextHop = line[lineIndex][20:40]
                 nextHop = nextHop.strip()
-                # nextHopDict['*> 200.7.0.0'] = nextHop
                 print(f'First condition (*> 200.7.0.0   ): {nextHop}')
                 pass
-                # continue
-                # pathList = [char for char in line.rstrip().decode("utf-8")[59:]]
-                # print("Changed!!!")
 
             elif line[lineIndex][:15] == '*> 200.7.0.0/16':
                 nextHop = line[lineIndex][20:40]
                 nextHop = nextHop.strip()
-                # nextHop['*> 200.7.0.0/16'] = nextHop
                 print(f'Second condition (*> 200.7.0.0/16): {nextHop}')
                 pass
-                # continue
-                # pathList = [char for char in line.rstrip().decode("utf-8")[59:]]
 
             elif line[lineIndex][:15] == '*  200.7.0.0/16' or line[lineIndex][:15] == '*  200.7.0.0   ':
-                # line = process.stdout.readline()
-                # print(line.rstrip().decode("utf-8")[:40])
                 if line[lineIndex + 1][:2] == '*>':
                     nextHop = line[lineIndex + 1][20:40]
                 else:
                     nextHop = line[lineIndex + 2][20:40]
                 nextHop = nextHop.strip()
-                # nextHop['*  200.7.0.0/16'] = nextHop
                 print(
                     f'Third condition (*  200.7.0.0/16 or *  200.7.0.0): {nextHop}')
                 pass
-                # continue
             else:
                 continue
             cursor = 0
             for node in topolopgy:
-                # print(
-                # f"name: {node['device_name']} || interface: {node['interfaces']}")
-                # break
                 for interface in range(len(node['interfaces'])):
-                    # print(node['interfaces'][f'eth{interface}']['ip_address'])
-                    # print(interface)
                     if node['interfaces'][f'eth{interface}']['ip_address'] == nextHop and (device, node['device_name']) not in routePathList:
                         routePathList.append((device, node['device_name']))
                     if len(routePathList) > 1:
                         del routePathList[0]
-                # breakpoint()
-                # else:
-                #     continue
-                #     print('found 1')
-                # cursor += 1
         print(routePathList)
-        # breakpoint()
-        # pathList = ' '.join(pathList).split()
-        # print(pathList)
-        # j = 1
-        # for i in pathList[:-2]:
-        #     if i == '0':
-        #         routePathList.append((device, pathDict[pathList[j]]))
-        #     else:
-        #         routePathList.append((pathDict[i], pathDict[pathList[j]]))
-        #     j += 1
         return routePathList
-
-# get_routePath()
 
 
 def animate_text(label, text):
@@ -180,7 +144,7 @@ def animate_text(label, text):
 def startLab():
     canvas.node('startLab').highlight().size('1x').pause(0.5)
     startLabProcess = subprocess.Popen(
-        ["kathara", "lrestart", "-o", "'image=kathara/custom-kathara-image'"], stdout=subprocess.PIPE)
+        ["kathara", "lrestart", "-o", "'image=kathara/custom-kathara-image'"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     startLabProcess = startLabProcess.stdout.readlines()
     startLabProcess = [startLabProcess.rstrip().decode("utf-8")
                        for startLabProcess in startLabProcess]
@@ -198,10 +162,10 @@ def startLab():
     deviceListDict = {}
     print(deviceList)
     for device in deviceList:
-        if device == 'server':
-            autonomousSystem = 'AS-2'
-        elif device == 'dumpserver':
-            autonomousSystem = 'AS-8'
+        if device == 'server' or device == 'router2':
+            autonomousSystem = 'AS-2 VICTIM'
+        elif device == 'dumpserver' or device == 'router8':
+            autonomousSystem = 'AS-8 ATTACKER'
         else:
             autonomousSystem = f'AS-{device[-1]}'
         deviceListDict[device] = {
@@ -210,7 +174,7 @@ def startLab():
     keys, values = deviceListDict.keys(), deviceListDict.values()
 
     canvas.nodes(keys).data(values).add(
-        shape='circle',
+        shape=lambda d: 'circle' if 'router' in d['device'] else 'rect',
         size=35,
         labels=lambda d: {
             0: {'text': d['device']},
@@ -221,6 +185,8 @@ def startLab():
             }
         }
     )
+    canvas.node('router2').color('green')
+    canvas.node('router8').color('red')
 
     node_coords = [(-10, -2), (3, -2), (16, -2), (3, 4), (-10, 4),
                    (3, 9), (16, 9), (-10, 9), (-4, 9), (-17, 9), (3, -7), (-10, -7), (16, -7), (8, 4), (-17, 4), (3, 12), (20, 9), (-4, 4)]
@@ -245,7 +211,7 @@ def applyFilters():
     dumpserverList = [
         dumpserver for dumpserver in deviceList if 'server' in dumpserver]
     for dumpserver in dumpserverList:
-        if dumpserver == 'dumpserver':
+        if dumpserver == 'dumpserver' or dumpserver == 'server':
             continue
         print(dumpserver)
         routeFilterProcess = subprocess.Popen(
@@ -258,6 +224,8 @@ def applyFilters():
         animate_text(title_label, 'Applying route filters to routers ...')
         for output in routeFilterProcess:
             print(output)
+    for _ in range(2):
+        click()
     animate_text(title_label, 'Route Filters Launched Successfully')
 
 

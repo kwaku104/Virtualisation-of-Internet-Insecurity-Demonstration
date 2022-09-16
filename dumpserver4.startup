@@ -22,7 +22,7 @@ printf "import paramiko \nfrom getpass import getpass \nimport time \
 \nremote_conn = remote_conn_pre.invoke_shell() \
 \noutput = remote_conn.recv(65535) \
 \nprint(output.decode(\"utf-8\")) \
-\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 4%s', \'neighbor 200.6.0.1 prefix-list partialInRouter2 in%s', \'ip prefix-list partialInRouter2 deny 200.7.0.0/24%s', \'ip prefix-list partialInRouter2 permit any%s', \'router bgp 4%s', \'neighbor 8.8.8.6 prefix-list partialInRouter6 in%s', \'ip prefix-list partialInRouter6 deny 200.7.0.0/24%s', \'ip prefix-list partialInRouter6 permit any%s', \'do clear ip bgp *%s', \'exit%s'] \
+\nattack_commands = [\'vtysh%s', \'conf t%s', \'router bgp 4%s', \'neighbor 200.6.0.1 prefix-list partialInRouter2 in%s', \'ip prefix-list partialInRouter2 deny 200.7.0.0/17 le 32%s', \'ip prefix-list partialInRouter2 permit any%s', \'router bgp 4%s', \'neighbor 8.8.8.6 prefix-list partialInRouter6 in%s', \'ip prefix-list partialInRouter6 deny 200.7.0.0/17 le 32%s', \'ip prefix-list partialInRouter6 permit any%s', \'do clear ip bgp *%s', \'exit%s'] \
 \n
 \nfor attack_command in attack_commands: \
 \n    remote_conn.send(attack_command) \
