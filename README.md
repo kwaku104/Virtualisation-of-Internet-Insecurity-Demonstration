@@ -1,7 +1,7 @@
 # Virtualisation of Internet Insecurity Demonstration
 
 The lab is designed to facilitate a MITM Attack using BGP Prefix Hijacking.
-
+![Final Network Topology Design](https://user-images.githubusercontent.com/37820793/190728275-79b66976-c6a7-4d62-a493-51138625bbfa.png)
 The network topology consists of nine autonomous systems ranging from ASN-1 to ASN-9 including the ATTACKER and VICTIM ASes. The VICTIM AS is ASN-2 and the ATTACKER AS is ASN-8. Each autonomous system consists of one router and one server and all the routers are configured to be bgp speakers. Scripts are launched on the servers to execute commands via SSH on the routers to automate the MITM attack or apply prefix filters to prevent the attack. TCP dump is also set up on the DUMP-SERVER of ASN-8 to analyse hijacked traffic intended for ASN-2 once the attack is launched.
 
 Since commands will be executed on the routers via the servers, the device.startup files of each server are used to set up SSH connections between the servers and routers and also write the python programs required to launch the attack and set up the prefix filters on the servers.
